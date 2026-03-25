@@ -261,7 +261,7 @@ curva = {i: curva_lista[i] for i in range(len(curva_lista))}
 # =========================
 st.markdown("""
 <div class="app-header">
-    <h1>Calculadora de</h1>
+    <h1>Projeção de Recuperação de Energia</h1>
     <p>Calculadora de impacto operacional</p>
 </div>
 """, unsafe_allow_html=True)
