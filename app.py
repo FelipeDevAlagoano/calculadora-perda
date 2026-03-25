@@ -401,7 +401,7 @@ if st.session_state.df is not None and st.session_state.df_res is None:
             "RED_MIN_EFICIÊNCIA":      round(red_min, 2),
             "RED_PARA_ADEQUADA":       round(red_10, 2),
             "RED_NECESSÁRIA":    round(red_total, 2),
-            "PERDA_FINAL":  round(perda_final, 2),
+            "PERDA_FINAL":  round(perda, 2),
             "ATINGIU_META": perda_final <= (perda - red_total),
             "TOTAL_ACOES":  sum(plano.values()),
             **plano
