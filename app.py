@@ -323,8 +323,8 @@ curva = {i: curva_lista[i] for i in range(len(curva_lista))}
 # =========================
 st.markdown("""
 <div class="app-header">
-    <h1>Projeção de Perdas</h1>
-    <p>Calculadora de impacto operacional</p>
+    <h1>Gestão de Perdas</h1>
+    <p>Planejamento, otimização e simulação operacional</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -474,137 +474,43 @@ if st.session_state.df is not None and st.session_state.df_res is None:
 # =========================
 # DASHBOARD + SIMULADOR
 # =========================
-    if df_res is None or df_res.shape[0] == 0:
-        st.warning("Nenhum resultado gerado.")
-    
-        if df is None or df.empty:
-            st.info("Você ainda não carregou dados.")
-        else:
-            st.info("Os dados foram carregados, mas não geraram resultados. Verifique se as colunas estão corretas.")
-    
-        st.stop()
+if st.session_state.df_res is not None:
 
-    # 1. MÉTRICAS EXECUTIVAS (3 colunas)
-    st.markdown('<p class="section-label">Visão Executiva</p>', unsafe_allow_html=True)
-    
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Instalações", len(df_res))
-    col2.metric("Meta OK", f"{df_res['ATINGIU_META'].mean() * 100:.1f}%")
-    col3.metric("Ações Totais", int(df_res["TOTAL_ACOES"].sum()))
-    col4.metric("Perda Média", f"{df_res['PERDA_%'].mean():.1f}%")
+    df_res = st.session_state.df_res
+    df     = st.session_state.df
+
+    # Métricas
+    st.markdown('<p class="section-label">Visão Geral</p>', unsafe_allow_html=True)
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Instalações",   len(df_res))
+    c2.metric("Meta atingida", f"{df_res['ATINGIU_META'].mean() * 100:.1f}%")
+    c3.metric("Ações totais",  int(df_res["TOTAL_ACOES"].sum()))
 
     st.markdown("---")
 
-    # 2. RANKING COM FILTRO (top 10 + todas)
-    st.markdown('<p class="section-label">Ranking Crítico</p>', unsafe_allow_html=True)
-    
-    col_rank1, col_rank2 = st.columns([3, 1])
-    with col_rank2:
-        mostrar = st.selectbox("Mostrar", ["Top 10", "Todas"], 
-                              index=1 if len(df_res) <= 10 else 0)
-    
-    if mostrar == "Top 10":
-        df_ranking = df_res.nlargest(10, "PERDA_%")
-    else:
-        df_ranking = df_res
-    
+    # Ranking
+    st.markdown('<p class="section-label">Ranking por Perda</p>', unsafe_allow_html=True)
     st.dataframe(
-        df_ranking.sort_values("PERDA_%", ascending=False)[
-            ["INSTALACAO", "PERDA_%", "RED_NECESSÁRIA", "PERDA_FINAL", "ATINGIU_META"]
-        ],
-        use_container_width=True,
-        hide_index=True
+        df_res.sort_values("PERDA_%", ascending=False),
+        use_container_width=True
     )
 
-    # 3. GRÁFICOS SIDE-BY-SIDE
-    st.markdown('<p class="section-label">Análise Visual</p>', unsafe_allow_html=True)
-    
-    col_g1, col_g2 = st.columns(2)
-    
-    with col_g1:
-        st.markdown("**Perdas (%)**")
-        st.bar_chart(
-            df_res.set_index("INSTALACAO")["PERDA_%"], 
-            use_container_width=True,
-            height=300
-        )
-    
-    with col_g2:
-        st.markdown("**Ações Necessárias**")
-        st.bar_chart(
-            df_res.set_index("INSTALACAO")["TOTAL_ACOES"], 
-            use_container_width=True,
-            height=300
-        )
+    # Gráficos
+    st.markdown('<p class="section-label">Perda por Instalação (%)</p>', unsafe_allow_html=True)
+    st.bar_chart(df_res.set_index("INSTALACAO")["PERDA_%"], use_container_width=True)
 
-    st.markdown("---")
+    st.markdown('<p class="section-label">Ações por Instalação</p>', unsafe_allow_html=True)
+    st.bar_chart(df_res.set_index("INSTALACAO")["TOTAL_ACOES"], use_container_width=True)
 
-     # =========================
-    # EXPORTAÇÃO AVANÇADA
-    # =========================
-    st.markdown('<p class="section-label">Exportar Relatório</p>', unsafe_allow_html=True)
-    
-    # 1. RESUMO GERAL
-    resumo = pd.DataFrame({
-        "Métrica": ["Instalações Totais", "Meta Atingida (%)", "Ações Totais", "Perda Média (%)"],
-        "Valor": [
-            len(df_res),
-            f"{df_res['ATINGIU_META'].mean() * 100:.1f}%",
-            int(df_res["TOTAL_ACOES"].sum()),
-            f"{df_res['PERDA_%'].mean():.1f}%"
-        ]
-    })
-    
-    # 2. AÇÕES AGREGADAS
-    acoes_totais = pd.DataFrame({
-        "Ação": ["Inclusões", "Cod 100", "Exclusões", "Cod 200", "Cod 300"],
-        "Impacto Unitário": [150, 120, 100, 100, 30],
-        "Quantidade Total": [
-            int(df_res["Inclusoes"].sum()),
-            int(df_res["Cod100"].sum()), 
-            int(df_res["Exclusoes"].sum()),
-            int(df_res["Cod200"].sum()),
-            int(df_res["Cod300"].sum())
-        ],
-        "Impacto Total": [
-            int(df_res["Inclusoes"].sum() * 150),
-            int(df_res["Cod 100"].sum() * 120),
-            int(df_res["Exclusoes"].sum() * 100),
-            int(df_res["Cod 200"].sum() * 100),
-            int(df_res["Cod 300"].sum() * 30)
-        ]
-    })
-    
-    # 3. MERGE DOS 3 RELATÓRIOS
-    relatorio_completo = pd.concat([
-        resumo,
-        pd.DataFrame({"": [""] * len(resumo)}),  # Linha em branco
-        pd.DataFrame({"Título": ["RESUMO DAS AÇÕES"], "": [""]}),
-        acoes_totais,
-        pd.DataFrame({"": [""] * len(acoes_totais)}),  # Linha em branco  
-        pd.DataFrame({"Título": ["DETALHAMENTO POR INSTALAÇÃO"], "": [""]}),
-        df_res
-    ], ignore_index=True)
-    
-    col1, col2 = st.columns([1, 2])
-    
-    with col1:
-        # CSV Simples
-        st.download_button(
-            "📊 CSV Simples",
-            df_res.to_csv(index=False),
-            "resultado.csv",
-            mime="text/csv"
-        )
-    
-    with col2:
-        # RELATÓRIO COMPLETO
-        st.download_button(
-            "📈 Relatório Completo",
-            relatorio_completo.to_csv(index=False),
-            "relatorio-completo.csv",
-            mime="text/csv"
-        )
+    # Download
+    st.markdown('<p class="section-label">Exportar</p>', unsafe_allow_html=True)
+    st.download_button(
+        "Baixar resultado (.csv)",
+        df_res.to_csv(index=False),
+        "resultado.csv",
+        mime="text/csv"
+    )
 
     st.markdown("---")
 
@@ -619,7 +525,7 @@ if st.session_state.df is not None and st.session_state.df_res is None:
         - base["REVERSA"] - base["CONSUMO"]
         - base["ILUMINACAO_PUBLICA"]
     )
-    meta = perda - df_res[df_res["INSTALACAO"] == inst_sel]["RED_NECESSÁRIA"].iloc[0]
+    meta = perda - df_res[df_res["INSTALACAO"] == inst_sel]["RED_TOTAL"].iloc[0]
 
     col1, col2 = st.columns(2)
 
