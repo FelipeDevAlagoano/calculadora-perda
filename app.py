@@ -420,8 +420,7 @@ if st.session_state.df_res is not None:
 
     c1, c2, c3 = st.columns(3)
     c1.metric("Instalações",   len(df_res))
-    c2.metric("Meta atingida", f"{df_res['ATINGIU_META'].mean() * 100:.1f}%")
-    c3.metric("Ações totais",  int(df_res["TOTAL_ACOES"].sum()))
+    
 
     st.markdown("---")
 
