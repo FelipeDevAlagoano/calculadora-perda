@@ -478,6 +478,11 @@ if st.session_state.df_res is not None:
     df_res = st.session_state.df_res
     df = st.session_state.df
 
+    # ✅ CORREÇÃO 2 — proteção
+    if df_res.empty:
+        st.warning("Nenhuma instalação válida para cálculo (dados zerados ou inválidos).")
+        st.stop()
+
     # 1. MÉTRICAS EXECUTIVAS (3 colunas)
     st.markdown('<p class="section-label">Visão Executiva</p>', unsafe_allow_html=True)
     
