@@ -475,33 +475,63 @@ if st.session_state.df is not None and st.session_state.df_res is None:
 # DASHBOARD + SIMULADOR
 # =========================
 if st.session_state.df_res is not None:
-
     df_res = st.session_state.df_res
-    df     = st.session_state.df
+    df = st.session_state.df
 
-    # Métricas - 100% FUNCIONAL
-    st.markdown('<p class="section-label">Visão Geral</p>', unsafe_allow_html=True)
+    # 1. MÉTRICAS EXECUTIVAS (3 colunas)
+    st.markdown('<p class="section-label">Visão Executiva</p>', unsafe_allow_html=True)
     
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Instalações", len(df_res))
-    c2.metric("Meta atingida", f"{df_res['ATINGIU_META'].mean() * 100:.1f}%")
-    c3.metric("Ações totais", int(df_res["TOTAL_ACOES"].sum()))
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Instalações", len(df_res))
+    col2.metric("Meta OK", f"{df_res['ATINGIU_META'].mean() * 100:.1f}%")
+    col3.metric("Ações Totais", int(df_res["TOTAL_ACOES"].sum()))
+    col4.metric("Perda Média", f"{df_res['PERDA_%'].mean():.1f}%")
 
     st.markdown("---")
 
-    # Ranking
-    st.markdown('<p class="section-label">Ranking por Perda</p>', unsafe_allow_html=True)
+    # 2. RANKING COM FILTRO (top 10 + todas)
+    st.markdown('<p class="section-label">Ranking Crítico</p>', unsafe_allow_html=True)
+    
+    col_rank1, col_rank2 = st.columns([3, 1])
+    with col_rank2:
+        mostrar = st.selectbox("Mostrar", ["Top 10", "Todas"], 
+                              index=1 if len(df_res) <= 10 else 0)
+    
+    if mostrar == "Top 10":
+        df_ranking = df_res.nlargest(10, "PERDA_%")
+    else:
+        df_ranking = df_res
+    
     st.dataframe(
-        df_res.sort_values("PERDA_%", ascending=False),
-        use_container_width=True
+        df_ranking.sort_values("PERDA_%", ascending=False)[
+            ["INSTALACAO", "PERDA_%", "RED_NECESSÁRIA", "PERDA_FINAL", "ATINGIU_META"]
+        ],
+        use_container_width=True,
+        hide_index=True
     )
 
-    # Gráficos
-    st.markdown('<p class="section-label">Perda por Instalação (%)</p>', unsafe_allow_html=True)
-    st.bar_chart(df_res.set_index("INSTALACAO")["PERDA_%"], use_container_width=True)
+    # 3. GRÁFICOS SIDE-BY-SIDE
+    st.markdown('<p class="section-label">Análise Visual</p>', unsafe_allow_html=True)
+    
+    col_g1, col_g2 = st.columns(2)
+    
+    with col_g1:
+        st.markdown("**Perdas (%)**")
+        st.bar_chart(
+            df_res.set_index("INSTALACAO")["PERDA_%"], 
+            use_container_width=True,
+            height=300
+        )
+    
+    with col_g2:
+        st.markdown("**Ações Necessárias**")
+        st.bar_chart(
+            df_res.set_index("INSTALACAO")["TOTAL_ACOES"], 
+            use_container_width=True,
+            height=300
+        )
 
-    st.markdown('<p class="section-label">Ações por Instalação</p>', unsafe_allow_html=True)
-    st.bar_chart(df_res.set_index("INSTALACAO")["TOTAL_ACOES"], use_container_width=True)
+    st.markdown("---")
 
      # =========================
     # EXPORTAÇÃO AVANÇADA
