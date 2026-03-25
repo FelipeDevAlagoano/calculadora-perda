@@ -9,33 +9,36 @@ st.set_page_config(
 )
 
 # =========================
-# PALETA PERFEITA - Tailwind Style
+# PALETA LIME-TEAL VIBRANT
 # =========================
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* BASE */
+/* VARIÁVEIS DA PALETA */
 :root {
-    --bg-primary: #f8fafc;
-    --bg-secondary: #f1f5f9;
+    --lime-cream: #d9ed92;
+    --light-green: #b5e48c;
+    --light-green-2: #99d98c;
+    --emerald: #76c893;
+    --ocean-mist: #52b69a;
+    --tropical-teal: #34a0a4;
+    --bondi-blue: #168aad;
+    --cerulean: #1a759f;
+    --baltic-blue: #1e6091;
+    --yale-blue: #184e77;
+    
+    --bg-primary: #f9fcfa;
     --bg-card: #ffffff;
-    --border: #e2e8f0;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #64748b;
-    --accent: #3b82f6;
-    --accent-hover: #2563eb;
-    --success: #10b981;
-    --danger: #ef4444;
+    --text-primary: #1a3c34;
+    --text-secondary: #2d5a4a;
+    --border: #e6f3e8;
 }
 
-* {
-    font-family: 'Inter', sans-serif;
-}
-
-.stApp {
-    background: var(--bg-primary);
+/* BASE */
+* { font-family: 'Inter', sans-serif; }
+.stApp { 
+    background: linear-gradient(135deg, var(--bg-primary) 0%, #f0f8f5 100%);
     color: var(--text-primary);
 }
 
@@ -45,13 +48,25 @@ st.markdown("""
     color: var(--text-primary);
 }
 
-/* HEADER MODERNO */
+/* HEADER VIBRANTE */
 .app-header {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    background: linear-gradient(135deg, var(--yale-blue) 0%, var(--baltic-blue) 20%, var(--bondi-blue) 100%);
     border-radius: 24px;
     padding: 2.5rem 2rem 2rem;
     margin-bottom: 2.5rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 25px 50px -12px rgba(24, 78, 119, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.app-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--lime-cream), var(--light-green), var(--tropical-teal));
 }
 
 .app-header h1 {
@@ -59,11 +74,11 @@ st.markdown("""
     font-size: clamp(1.75rem, 5vw, 2.25rem);
     font-weight: 700;
     margin: 0 0 0.5rem;
-    letter-spacing: -0.025em;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .app-header p {
-    color: #cbd5e1;
+    color: #e6f3e8;
     font-size: 1rem;
     font-weight: 400;
     margin: 0;
@@ -75,27 +90,43 @@ st.markdown("""
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--text-muted);
+    background: linear-gradient(135deg, var(--tropical-teal), var(--bondi-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin: 3rem 0 1.25rem 0;
 }
 
-/* MÉTRICAS ELEGANTES */
+/* MÉTRICAS LIME-GREEN */
 [data-testid="metric-container"] {
     background: var(--bg-card);
-    border: 1px solid var(--border);
+    border: 1px solid var(--light-green-2);
     border-radius: 20px;
     padding: 1.75rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 15px -3px rgba(99, 217, 140, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+[data-testid="metric-container"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--lime-cream), var(--light-green));
 }
 
 [data-testid="metric-container"]:hover {
     transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 25px -5px rgba(99, 217, 140, 0.3);
+    border-color: var(--emerald);
 }
 
 [data-testid="metric-container"] > div:first-child {
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0.05em;
@@ -108,7 +139,7 @@ st.markdown("""
     font-size: clamp(1.5rem, 5vw, 2rem);
 }
 
-/* INPUTS MODERNOS */
+/* INPUTS TEAL */
 [data-testid="stTextInput"] input,
 [data-testid="stNumberInput"] input {
     border-radius: 16px;
@@ -118,14 +149,12 @@ st.markdown("""
     font-weight: 500;
     padding: 1rem 1.25rem;
     transition: all 0.2s ease;
-    font-size: 0.95rem;
 }
 
 [data-testid="stTextInput"] input:focus,
 [data-testid="stNumberInput"] input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-    outline: none;
+    border-color: var(--tropical-teal);
+    box-shadow: 0 0 0 4px rgba(52, 160, 164, 0.15);
 }
 
 label {
@@ -136,50 +165,56 @@ label {
     text-transform: uppercase;
 }
 
-/* BOTÕES */
+/* BOTÕES EMERALD */
 .stButton > button {
-    background: linear-gradient(135deg, var(--accent), #1d4ed8);
+    background: linear-gradient(135deg, var(--ocean-mist), var(--tropical-teal));
     color: white;
     border-radius: 16px;
     font-weight: 600;
     padding: 1rem 1.75rem;
     border: none;
-    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 10px 15px -3px rgba(52, 160, 164, 0.4);
     transition: all 0.3s ease;
 }
 
 .stButton > button:hover {
-    background: linear-gradient(135deg, var(--accent-hover), #1e40af);
+    background: linear-gradient(135deg, var(--bondi-blue), var(--cerulean));
     transform: translateY(-2px);
-    box-shadow: 0 20px 20px -5px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 20px 20px -5px rgba(52, 160, 164, 0.5);
 }
 
 .stDownloadButton > button {
-    background: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--lime-cream), var(--light-green));
     color: var(--text-primary);
-    border: 2px solid var(--border);
+    border: 2px solid var(--light-green-2);
     border-radius: 16px;
     font-weight: 600;
+}
+
+.stDownloadButton > button:hover {
+    background: linear-gradient(135deg, var(--light-green), var(--emerald));
+    transform: translateY(-1px);
 }
 
 /* DATAFRAME */
 [data-testid="stDataFrame"] {
     border-radius: 20px;
     border: 1px solid var(--border);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 15px -3px rgba(52, 160, 164, 0.15);
 }
 
-/* ALERTAS E RESULTADOS */
+/* RESULTADOS */
 .sim-result-ok {
-    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-    border: 2px solid var(--success);
-    color: #065f46;
+    background: linear-gradient(135deg, var(--light-green), var(--light-green-2));
+    border: 2px solid var(--emerald);
+    color: #1a533d;
     border-radius: 16px;
+    box-shadow: 0 10px 20px rgba(118, 200, 147, 0.3);
 }
 
 .sim-result-fail {
     background: linear-gradient(135deg, #fee2e2, #fecaca);
-    border: 2px solid var(--danger);
+    border: 2px solid #f87171;
     color: #991b1b;
     border-radius: 16px;
 }
