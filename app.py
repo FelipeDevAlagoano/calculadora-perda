@@ -528,8 +528,8 @@ if st.session_state.df_res is not None:
     # =========================
     ganho_total = (
         calcular_ganho(inc,  ganho_inc,  "Inclusões") +
-        calcular_ganho(c100, ganho_c100, "Cod 100") +
-        calcular_ganho(exc,  -ganho_exc,  "Exclusões") +
+        calcular_ganho(c100, ganho_c100, "Cod 100") -
+        calcular_ganho(exc, ganho_exc,  "Exclusões") +
         calcular_ganho(c200, ganho_c200, "Cod 200") +
         calcular_ganho(c300, ganho_c300, "Cod 300")
     )
