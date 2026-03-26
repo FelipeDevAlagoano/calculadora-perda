@@ -441,40 +441,100 @@ if st.session_state.df_res is not None:
 
     st.markdown("---")
 
+        # =========================
     # Simulador
+    # =========================
     st.markdown('<p class="section-label">Simulação de Ações</p>', unsafe_allow_html=True)
-
+    
     inst_sel = st.selectbox("Instalação", df_res["INSTALACAO"])
-
+    
     base  = df[df["INSTALACAO"] == inst_sel].iloc[0]
     perda = (
         base["REQUERIDA"] + base["INJETADA"]
         - base["REVERSA"] - base["CONSUMO"]
         - base["ILUMINACAO_PUBLICA"]
     )
+    
     meta = perda - df_res[df_res["INSTALACAO"] == inst_sel]["RED_NECESSÁRIA"].iloc[0]
-
+    
+    # =========================
+    # MODO DE GANHO
+    # =========================
+    modo_ganho = st.radio(
+        "Modo de cálculo do ganho",
+        ["Valor médio", "Customizar individualmente"],
+        horizontal=True
+    )
+    
+    # =========================
+    # FUNÇÃO AUXILIAR
+    # =========================
+    def calcular_ganho(qtd, valor_padrao, prefixo):
+        if qtd == 0:
+            return 0
+    
+        # MODO MÉDIO
+        if modo_ganho == "Valor médio":
+            valor = st.number_input(
+                f"{prefixo} (kWh por ação)",
+                min_value=0.0,
+                value=float(valor_padrao),
+                key=f"{prefixo}_medio"
+            )
+            return qtd * valor
+    
+        # MODO CUSTOMIZADO
+        else:
+            ganhos = []
+            with st.expander(f"Detalhar {prefixo}"):
+                for i in range(qtd):
+                    val = st.number_input(
+                        f"{prefixo} #{i+1} (kWh)",
+                        min_value=0.0,
+                        value=float(valor_padrao),
+                        key=f"{prefixo}_{i}"
+                    )
+                    ganhos.append(val)
+            return sum(ganhos)
+    
+    # =========================
+    # INPUT DE AÇÕES
+    # =========================
     col1, col2 = st.columns(2)
-
+    
     with col1:
         inc  = st.number_input("Inclusões",  0, key="sim_inc")
         c100 = st.number_input("Cod 100",    0, key="sim_c100")
         c200 = st.number_input("Cod 200",    0, key="sim_c200")
-
+    
     with col2:
         exc  = st.number_input("Exclusões",  0, key="sim_exc")
         c300 = st.number_input("Cod 300",    0, key="sim_c300")
-
-    ganho      = inc * 150 + c100 * 120 + exc * 100 + c200 * 100 + c300 * 30
-    perda_proj = perda - ganho
-
+    
+    # =========================
+    # GANHO DINÂMICO
+    # (usa valores padrão já definidos no app)
+    # =========================
+    ganho_total = (
+        calcular_ganho(inc,  ganho_inc,  "Inclusões") +
+        calcular_ganho(c100, ganho_c100, "Cod 100") +
+        calcular_ganho(exc,  ganho_exc,  "Exclusões") +
+        calcular_ganho(c200, ganho_c200, "Cod 200") +
+        calcular_ganho(c300, ganho_c300, "Cod 300")
+    )
+    
+    perda_proj = perda - ganho_total
+    
+    # =========================
+    # RESULTADO
+    # =========================
     st.markdown('<p class="section-label">Resultado projetado</p>', unsafe_allow_html=True)
-
+    
     r1, r2, r3 = st.columns(3)
-    r1.metric("Ganho",       f"{ganho:.2f}")
+    r1.metric("Ganho",       f"{ganho_total:.2f}")
     r2.metric("Perda Atual", f"{perda_proj:.2f}")
     r3.metric("Meta",        f"{meta:.2f}")
-
+    
     if perda_proj <= meta:
         st.markdown('<div class="sim-result-ok">Meta atingida</div>', unsafe_allow_html=True)
     else:
@@ -482,6 +542,5 @@ if st.session_state.df_res is not None:
             f'<div class="sim-result-fail">Faltam {perda_proj - meta:.2f} kWh para atingir a meta</div>',
             unsafe_allow_html=True
         )
-
 else:
     st.info("Selecione um modo de entrada e insira os dados para iniciar a análise.")
