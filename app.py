@@ -502,7 +502,8 @@ if st.session_state.df_res is not None:
                         f"{prefixo} #{i+1} (kWh)",
                         min_value=0.0,
                         value=float(valor_padrao),
-                        key=f"{prefixo}_{i}"
+                        key=f"{prefixo}_{i}",
+                        step = 20
                     )
                     ganhos.append(val)
             return sum(ganhos)
