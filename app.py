@@ -411,7 +411,7 @@ if st.session_state.df is not None and st.session_state.df_res is None:
 # =========================
 ganho_inc  = 150.0
 ganho_c100 = 120.0
-ganho_exc  = -100.0
+ganho_exc  = 100.0
 ganho_c200 = 100.0
 ganho_c300 = 30.0
 
