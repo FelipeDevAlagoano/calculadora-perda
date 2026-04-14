@@ -263,6 +263,8 @@ st.markdown("""
 <div class="app-header">
     <h1>Projeção de Recuperação de Energia</h1>
     <p>Calculadora de impacto operacional</p>
+    <p>Desenvolvido por: José Pedrosa</p>
+    <p>jose.peronico@equatorialenergia.com.br</p>
 </div>
 """, unsafe_allow_html=True)
 
