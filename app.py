@@ -359,6 +359,7 @@ if st.session_state.df is not None and st.session_state.df_res is None:
     for _, row in df.iterrows():
 
         total = row["REQUERIDA"] + row["INJETADA"]
+
         perda = (
             row["REQUERIDA"] + row["INJETADA"]
             - row["REVERSA"] - row["CONSUMO"]
@@ -369,16 +370,45 @@ if st.session_state.df is not None and st.session_state.df_res is None:
         if total == 0:
             continue
 
+        # =========================
+        # PERDA ATUAL (%)
+        # =========================
         perda_pct = perda / total
-        faixa     = math.ceil(perda_pct * 100)
-        meta_pct  = curva.get(faixa, 0)
 
-        red_min   = perda * (meta_pct / 100)
-        red_10    = max(0, perda - 0.10 * total)
+        # =========================
+        # CURVA (em pontos percentuais)
+        # =========================
+        faixa    = math.ceil(perda_pct * 100)
+        meta_pct = curva.get(faixa, 0)
+
+        # 🔹 Nova perda percentual alvo (curva)
+        nova_perda_pct_curva = max(0, perda_pct - (meta_pct / 100))
+
+        # 🔹 Converter para kWh
+        perda_alvo_curva_kwh = nova_perda_pct_curva * total
+
+        # 🔹 Redução necessária pela curva
+        red_min = perda - perda_alvo_curva_kwh
+
+        # =========================
+        # META 10%
+        # =========================
+        perda_10_pct = 0.10
+        perda_10_kwh = perda_10_pct * total
+
+        red_10 = perda - perda_10_kwh
+
+        # =========================
+        # REDUÇÃO FINAL NECESSÁRIA
+        # =========================
         red_total = max(red_min, red_10)
 
+        # =========================
+        # PLANO DE AÇÃO
+        # =========================
         ganho = 0
         plano = {}
+
         acoes = [
             ("Inclusoes", 150),
             ("Cod100",    120),
@@ -386,24 +416,40 @@ if st.session_state.df is not None and st.session_state.df_res is None:
             ("Cod200",    100),
             ("Cod300",     30)
         ]
+
         acoes.sort(key=lambda x: x[1], reverse=True)
 
         for nome, impacto in acoes:
             if ganho >= red_total:
                 break
-            qtd   = math.ceil((red_total - ganho) / impacto)
+
+            if impacto <= 0:
+                continue  # evita distorção com exclusões
+
+            qtd = math.ceil((red_total - ganho) / impacto)
             plano[nome] = qtd
             ganho += qtd * impacto
 
-        perda_final = perda - ganho
+        perda_final = max(0, perda - ganho)
 
+        # =========================
+        # RESULTADOS
+        # =========================
         resultados.append({
-            "INSTALACAO":   row["INSTALACAO"],
-            "PERDA_%":      round(perda_pct * 100, 2),
-            "RED_MIN_EFICIÊNCIA":      round(red_min, 2),
-            "RED_PARA_ADEQUADA":       round(red_10, 2),
-            "RED_NECESSÁRIA":    round(red_total, 2),
-            "PERDA_(kWh)":  round(perda, 2)
+            "INSTALACAO": row["INSTALACAO"],
+            "PERDA_%": round(perda_pct * 100, 2),
+
+            "PERDA_KWH": round(perda, 2),
+
+            "PERDA_ALVO_CURVA_%": round(nova_perda_pct_curva * 100, 2),
+            "PERDA_ALVO_CURVA_KWH": round(perda_alvo_curva_kwh, 2),
+
+            "RED_MIN_CURVA_KWH": round(red_min, 2),
+            "RED_PARA_10%_KWH": round(red_10, 2),
+
+            "RED_NECESSARIA_KWH": round(red_total, 2),
+
+            "PERDA_POS_ACAO_KWH": round(perda_final, 2),
         })
 
     st.session_state.df_res = pd.DataFrame(resultados)
