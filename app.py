@@ -437,7 +437,7 @@ if st.session_state.df is not None and st.session_state.df_res is None:
         # =========================
         resultados.append({
             "INSTALACAO": row["INSTALACAO"],
-            "PERDA_%": round(perda_pct * 100, 2),
+            "PERDA_%": round(perda_pct_atual * 100, 2),
 
             "PERDA_KWH": round(perda, 2),
 
