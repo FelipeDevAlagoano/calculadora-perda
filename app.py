@@ -437,18 +437,18 @@ if st.session_state.df is not None and st.session_state.df_res is None:
         # =========================
         resultados.append({
             "INSTALACAO": row["INSTALACAO"],
-            "PERDA_%": round(perda_pct_atual * 100, 2),
-
+        
+            "PERDA_%": round(perda_pct * 100, 2),
             "PERDA_KWH": round(perda, 2),
-
-            "PERDA_ALVO_CURVA_%": round(nova_perda_pct_curva * 100, 2),
+        
+            "PERDA_ALVO_CURVA_%": round(perda_pct_alvo * 100, 2),
             "PERDA_ALVO_CURVA_KWH": round(perda_alvo_curva_kwh, 2),
-
+        
             "RED_MIN_CURVA_KWH": round(red_min, 2),
             "RED_PARA_10%_KWH": round(red_10, 2),
-
+        
             "RED_NECESSARIA_KWH": round(red_total, 2),
-
+        
             "PERDA_POS_ACAO_KWH": round(perda_final, 2),
         })
 
