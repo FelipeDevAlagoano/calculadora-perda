@@ -378,13 +378,13 @@ if st.session_state.df is not None and st.session_state.df_res is None:
         # =========================
         # CURVA (correta)
         # =========================
-        faixa = int(round(perda_pct_atual * 100, 0))
+        faixa = int(round(perda_pct * 100, 0))
         faixa = min(max(faixa, 0), max(curva.keys()))
         
         meta_pp = curva.get(faixa, 0)
         
         # 🔹 perda alvo em %
-        perda_pct_alvo = max(0, (perda_pct_atual * 100 - meta_pp) / 100)
+        perda_pct_alvo = max(0, (perda_pct * 100 - meta_pp) / 100)
         
         # 🔹 converter para kWh
         perda_alvo_curva_kwh = perda_pct_alvo * total
